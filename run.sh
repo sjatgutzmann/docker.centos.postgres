@@ -5,7 +5,7 @@
 
 # show all PG ENVs
 set | grep PG
-set -x
+#set -x
 
 start_postgres() {
 	echo "starting postgresql"
@@ -19,15 +19,23 @@ ARG1=$1;
 
 # setting default, simulation of CMD ["psql"] in Dockerfile
 if [ -z ${ARG1} ]; then
+	echo -n "setting default start arg to "
 	ARG1="psql"		
+	echo $ARG1
 fi
 
 echo "starting this container with ${ARG1}"
 
-if [ "${ARG1}" = 'psql' ]; then
+case "$ARG1" in
+ 	"psql")
 	start_postgres \
 	&& echo "entering psql mode" \
 	&& type ${PG_HOME}/bin/psql \
 	&& ${PG_HOME}/bin/psql
-fi
-
+	;;
+	"bash")
+	start_postgres \
+	&& echo "entering bash mode" \
+	&& /bin/bash
+	;;
+esac
