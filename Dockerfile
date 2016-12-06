@@ -13,11 +13,16 @@ ENV PG_LOG_PATH=/var/log/postgres
 ENV PG_LOG_FILE=${PG_LOG_PATH}/postgres.log
 ENV LANG en_US.utf8
 
+# as default creating user, password and db with docker. Overwrite this ENV to use these DB in a composed system
+ENV PG_CREATE_USER docker
+ENV PG_CREATE_PASSWORD docker
+ENV PG_CREATE_DB docker
+
 # https://www.liquidweb.com/kb/how-to-install-and-connect-to-postgresql-on-centos-7/
 
 
 RUN yum -y update; yum clean all \
- && yum -y install sudo epel-release sed \
+ && yum -y install sudo epel-release sed net-tools less augeas\
 # lanugae support
 # reinstall glib to get all lanuages
  && yum -y reinstall glibc-common
@@ -35,12 +40,17 @@ RUN mkdir ${PG_LOG_PATH}
 RUN chown postgres:postgres ${PG_LOG_PATH}
 
 RUN systemctl enable postgresql-${PG_VERSION}
-RUN /usr/pgsql-${PG_VERSION}/bin/postgresql${PG_VERSION_SMALL}-setup initdb
+#--encoding=ENCODING   set default encoding for new databases
+#      --locale=LOCALE       set default locale for new databases
+#      --lc-collate=, --lc-ctype=, --lc-messages=LOCALE
+#      --lc-monetary=, --lc-numeric=, --lc-time=LOCALE
+#       set default locale in the respective category for
+#       new databases (default taken from environment)
+RUN /usr/pgsql-${PG_VERSION}/bin/postgresql${PG_VERSION_SMALL}-setup  initdb
 
 EXPOSE 5432
 VOLUME ${PGDATA} ${PG_LOG_PATH}
-#RUN cp /var/lib/pgsql/data/pg_hba.conf /var/lib/pgsql/data/pg_hba.conf.bak
-#RUN sed -i 's/ident/md5' /var/lib/pgsql/data/pg_hba.conf
+
 COPY run.sh /run.sh
 RUN chown postgres:postgres /run.sh
 USER postgres
@@ -53,5 +63,5 @@ ENTRYPOINT ["/run.sh"]
 #psql sql console 
 
 #ENTRYPOINT ${PG_HOME}/bin/pg_ctl start -l ${PG_LOG_FILE} && /bin/bash 
-CMD ["psql"]
+CMD ["logtail"]
 
