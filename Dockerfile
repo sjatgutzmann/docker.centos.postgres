@@ -10,7 +10,7 @@ ENV PGDATA=/var/lib/pgsql/${PG_VERSION}/data
 ENV PG_HOME=/usr/pgsql-${PG_VERSION}
 ENV PG_USER_HOME=/var/lib/pgsql
 ENV PG_LOG_PATH=/var/log/postgres
-ENV PG_LOG_FILE=${PG_LOG_PATH}/postgres.log
+ENV PG_LOG_FILE=postgres.log
 ENV LANG en_US.utf8
 
 # as default creating user, password and db with docker. Overwrite this ENV to use these DB in a composed system
